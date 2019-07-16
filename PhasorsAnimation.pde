@@ -1,15 +1,20 @@
-import java.util.*;
-import java.util.Set;
-import java.util.HashSet;
-
-final int RADIUS = 50;
-final float FREQ = 0.01;
-final int NUM_TERMS = 50;
+int RADIUS = 50;
+float FREQ = 0.02;
+int NUM_TERMS = 50;
 
 Phasor[] function;
+PVector[] points = new PVector[1000];
 
-// PVector[] points = new PVector[513];
-Set<PVector> points;
+HScrollbar hRadius, hFreq, hTerms;
+
+PVector[] shiftRight(PVector[] arr) {
+  PVector last =  arr[arr.length-1];
+  for(int index=arr.length-2; index >= 0; index--) {
+    arr[index+1] = arr[index];
+  }
+  arr[0] = last;
+  return arr;
+}
 
 Phasor[] squareWave(int numTerms) {
   Phasor[] function = new Phasor[numTerms];
@@ -53,19 +58,27 @@ PVector drawEpicycles() {
 void setup() {
   size(900, 700);
   frameRate(144);
-  for (int i = 0; i < points.size(); i++) {
-    points.add(new PVector(0, 0));
+  for (int i = 0; i < points.length; i++) {
+    points[i] = new PVector(0, 0);
   }
   function = squareWave(NUM_TERMS);
   //function = sawWave(NUM_TERMS);
   //function = triangleWave(NUM_TERMS);
+  
+  hRadius = new HScrollbar(0, 7*height/8 + 8 + 0, width, 16, 16);
+  hFreq = new HScrollbar(0, 7*height/8 + 24 + 8, width, 16, 16);
+  hTerms = new HScrollbar(0, 7*height/8 + 40 + 16, width, 16, 16);
 }
 
 void draw() {
   // initialize
   background(0);
-  stroke(255);
+  stroke(255); //<>//
   noFill();
+  // Get slider settings
+  RADIUS = round(hRadius.getPos());
+  FREQ = round(hFreq.getPos());
+  NUM_TERMS = round(hTerms.getPos());
   // draw epicycles
   pushMatrix();
   translate(width/4, height/5); // left side
@@ -76,7 +89,8 @@ void draw() {
   PVector pen_tip = drawEpicycles();
 
   // save drawing vertices
-  points.add(pen_tip);
+  shiftRight(points);
+  points[0] = pen_tip;
 
   popStyle();
   popMatrix();
@@ -100,10 +114,10 @@ void draw() {
   translate(width/2, height/5);
   beginShape();
   
-  PVector[] pArray = (PVector[])points.toArray();
-  for (int i = 0; i < points.size(); i++) {
-    vertex(i, points.get(i).y);
+  for (int i = 0; i < points.length; i++) {
+    vertex(i, points[i].y);
   }
+  
   endShape();
   popMatrix();
   
@@ -111,11 +125,20 @@ void draw() {
   pushMatrix();
   translate(width/4, height/3);
   beginShape();
-  for (int i = 0; i < points.size(); i++) {
-    vertex(points.get(i).x, i); 
+  for (int i = 0; i < points.length; i++) {
+    vertex(points[i].x, i); 
   }
   endShape();
   popMatrix();
+  resetMatrix();
+  hRadius.update();
+  hFreq.update();
+  hTerms.update();
+  /*
+  hRadius.display();
+  hFreq.display();
+  hTerms.display();
+  */
 }
 
 class Phasor {
