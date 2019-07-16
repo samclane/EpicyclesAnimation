@@ -57,7 +57,7 @@ PVector drawEpicycles() {
 
 void setup() {
   size(900, 700);
-  frameRate(144);
+  frameRate(60);
   for (int i = 0; i < points.length; i++) {
     points[i] = new PVector(0, 0);
   }
@@ -70,15 +70,16 @@ void setup() {
   hTerms = new HScrollbar(0, 7*height/8 + 40 + 16, width, 16, 16);
 }
 
+int counter = 0;
 void draw() {
   // initialize
   background(0);
-  stroke(255); //<>//
+  stroke(255);
   noFill();
   // Get slider settings
-  RADIUS = round(hRadius.getPos());
-  FREQ = round(hFreq.getPos());
-  NUM_TERMS = round(hTerms.getPos());
+  //RADIUS = round(hRadius.getPos());
+  //FREQ = round(hFreq.getPos());
+  //NUM_TERMS = round(hTerms.getPos());
   // draw epicycles
   pushMatrix();
   translate(width/4, height/5); // left side
@@ -139,6 +140,15 @@ void draw() {
   hFreq.display();
   hTerms.display();
   */
+  if (counter < round(TWO_PI/FREQ)) {
+    // ffmpeg -framerate 60 -i "%06d.tif" -c:v libx264 -r 30 -pix_fmt yuv420p out.mp4
+    // ffmpeg -framerate 60 -i "%06d.tif" -r 30 out.gif
+    saveFrame("output/######.tif");
+    counter++;
+  }
+  else {
+    exit();
+  }
 }
 
 class Phasor {
