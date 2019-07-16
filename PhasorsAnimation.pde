@@ -3,7 +3,7 @@ float FREQ = 0.02;
 int NUM_TERMS = 50;
 
 Phasor[] function;
-PVector[] points = new PVector[1000];
+PVector[] points = new PVector[round(TWO_PI/FREQ)];
 
 HScrollbar hRadius, hFreq, hTerms;
 
@@ -61,8 +61,8 @@ void setup() {
   for (int i = 0; i < points.length; i++) {
     points[i] = new PVector(0, 0);
   }
-  function = squareWave(NUM_TERMS);
-  //function = sawWave(NUM_TERMS);
+  //function = squareWave(NUM_TERMS);
+  function = sawWave(NUM_TERMS);
   //function = triangleWave(NUM_TERMS);
   
   hRadius = new HScrollbar(0, 7*height/8 + 8 + 0, width, 16, 16);
