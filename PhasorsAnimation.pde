@@ -140,15 +140,14 @@ void draw() {
   hFreq.display();
   hTerms.display();
   */
-  if (counter < round(TWO_PI/FREQ)) {
+  
+  if (counter < 2.*round(TWO_PI/FREQ) && counter > round(TWO_PI/FREQ)) {
     // ffmpeg -framerate 60 -i "%06d.tif" -c:v libx264 -r 30 -pix_fmt yuv420p out.mp4
     // ffmpeg -framerate 60 -i "%06d.tif" -r 30 out.gif
-    saveFrame("output/######.tif");
-    counter++;
+    saveFrame("output/" + nf(counter-round(TWO_PI/FREQ)) + ".tif");
   }
-  else {
-    exit();
-  }
+
+  counter++;
 }
 
 class Phasor {
