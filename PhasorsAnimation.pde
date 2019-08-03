@@ -1,11 +1,13 @@
+import processing.sound.*;
+
 int RADIUS = 50;
-float FREQ = 0.02;
+float FREQ = 2;
 int NUM_TERMS = 50;
+float VOLUME = 0.01;
+SinOsc[] sinWaves;
 
 Phasor[] function;
-PVector[] points = new PVector[round(TWO_PI/FREQ)];
-
-HScrollbar hRadius, hFreq, hTerms;
+PVector[] points = new PVector[round(TWO_PI/FREQ)*width];
 
 PVector[] shiftRight(PVector[] arr) {
   PVector last =  arr[arr.length-1];
@@ -42,6 +44,15 @@ Phasor[] triangleWave(int numTerms) {
   return function;
 }
 
+Phasor[] sinWave(int numTerms) {
+  Phasor[] function = new Phasor[numTerms];
+  function[0] = new Phasor(RADIUS, FREQ);
+  for (int i = 1; i < numTerms; i++) {
+    function[i] = new Phasor(0, 0); 
+  }
+  return function;
+}
+
 PVector drawEpicycles() {
   PVector pen = new PVector(0, 0);
   for (Phasor p : function) {
@@ -61,13 +72,27 @@ void setup() {
   for (int i = 0; i < points.length; i++) {
     points[i] = new PVector(0, 0);
   }
-  //function = squareWave(NUM_TERMS);
-  function = sawWave(NUM_TERMS);
-  //function = triangleWave(NUM_TERMS);
   
-  hRadius = new HScrollbar(0, 7*height/8 + 8 + 0, width, 16, 16);
-  hFreq = new HScrollbar(0, 7*height/8 + 24 + 8, width, 16, 16);
-  hTerms = new HScrollbar(0, 7*height/8 + 40 + 16, width, 16, 16);
+  // function = squareWave(NUM_TERMS);
+  // function = sawWave(NUM_TERMS);
+  function = triangleWave(NUM_TERMS);
+  // function = sinWave(NUM_TERMS);
+  
+  sinWaves = new SinOsc[NUM_TERMS];
+  for (int i = 0; i < function.length; i++) {
+    sinWaves[i] = new SinOsc(this);
+    sinWaves[i].amp(map(function[i].amplitude, 0, RADIUS, VOLUME*-1, VOLUME*1));
+    sinWaves[i].freq(map(function[i].frequency, 0, 2 * FREQ * NUM_TERMS, 0, 44100*FREQ));
+    sinWaves[i].play();
+    println("Base Freq[" + i + "]: " + function[i].frequency);
+    println("Converted Freq[" + i + "]: " + map(function[i].frequency, 0, 2 * FREQ * NUM_TERMS, 0, 44100*FREQ));
+    println("Max Base Freq[" + i + "]: " + 2 * FREQ * NUM_TERMS);
+    println("");
+  }
+  println("Converted Freq: "  + map(function[0].frequency, 0, 2 * FREQ * NUM_TERMS, 0, 44100*FREQ));
+
+  println("Max Base Freq: " + 2 * FREQ * NUM_TERMS);
+
 }
 
 int counter = 0;
@@ -76,10 +101,7 @@ void draw() {
   background(0);
   stroke(255);
   noFill();
-  // Get slider settings
-  //RADIUS = round(hRadius.getPos());
-  //FREQ = round(hFreq.getPos());
-  //NUM_TERMS = round(hTerms.getPos());
+  
   // draw epicycles
   pushMatrix();
   translate(width/4, height/5); // left side
@@ -132,14 +154,6 @@ void draw() {
   endShape();
   popMatrix();
   resetMatrix();
-  hRadius.update();
-  hFreq.update();
-  hTerms.update();
-  /*
-  hRadius.display();
-  hFreq.display();
-  hTerms.display();
-  */
   
   if (counter < 2.*round(TWO_PI/FREQ) && counter > round(TWO_PI/FREQ)) {
     // ffmpeg -framerate 60 -i "%06d.tif" -c:v libx264 -r 30 -pix_fmt yuv420p out.mp4
